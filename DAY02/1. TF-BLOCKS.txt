@@ -1,11 +1,7 @@
-# Terraform Blocks in AWS – In-Depth Explanation
-
+Terraform Blocks in AWS – In-Depth Explanation
 This document covers all the key Terraform blocks used in AWS infrastructure provisioning with detailed explanations, examples, and best practices.
 
----
-
-## 1. `terraform` Block
-
+1. `terraform` Block
 Defines global settings for Terraform like required version, providers, and backend configuration.
 
 ```hcl
@@ -29,15 +25,11 @@ terraform {
 }
 ````
 
-### ✅ Key Points
-
+Key Points
 * Lock specific versions to avoid unexpected behavior.
 * Store `.tfstate` in S3 and lock with DynamoDB for safe collaboration.
 
----
-
-## 2. `provider` Block
-
+2. `provider` Block
 Configures the cloud platform.
 
 ```hcl
@@ -47,15 +39,11 @@ provider "aws" {
 }
 ```
 
-### ✅ Key Points
-
+✅ Key Points
 * Avoid hardcoding credentials; use environment variables or profiles.
 * `assume_role` helps with cross-account deployments.
 
----
-
-## 3. `resource` Block
-
+3. `resource` Block
 Defines infrastructure to be created.
 
 ```hcl
@@ -69,15 +57,11 @@ resource "aws_instance" "web" {
 }
 ```
 
-### ✅ Key Points
-
+✅ Key Points
 * Naming format: `resource "<PROVIDER>_<RESOURCE>" "<NAME>"`
 * Use tags for cost allocation and identification.
 
----
-
-## 4. `variable` Block
-
+4. `variable` Block
 Defines user inputs to parameterize configuration.
 
 ```hcl
@@ -88,15 +72,11 @@ variable "instance_type" {
 }
 ```
 
-### ✅ Key Points
-
+Key Points
 * Reference with `var.instance_type`
 * Can be passed via CLI, environment, or `.tfvars` file
 
----
-
-## 5. `output` Block
-
+5. `output` Block
 Prints values after provisioning.
 
 ```hcl
@@ -104,16 +84,11 @@ output "instance_public_ip" {
   value = aws_instance.web.public_ip
 }
 ```
-
-### ✅ Key Points
-
+Key Points
 * Helps fetch data for use in scripts, automation tools, or next modules.
 * Can be consumed by other Terraform configurations.
 
----
-
-## 6. `locals` Block
-
+6. `locals` Block
 Defines internal-only computed values.
 
 ```hcl
@@ -121,16 +96,11 @@ locals {
   name_prefix = "${var.project}-${var.environment}"
 }
 ```
-
-### ✅ Key Points
-
+✅ Key Points
 * Avoid repetitive code.
 * Good for naming conventions and derived logic.
 
----
-
-## 7. `module` Block
-
+7. `module` Block
 Reuses a set of Terraform configurations.
 
 ```hcl
@@ -139,18 +109,12 @@ module "vpc" {
   cidr_block = "10.0.0.0/16"
 }
 ```
-
-### ✅ Key Points
-
+Key Points
 * Promotes DRY principle (Don’t Repeat Yourself).
 * Can be local, remote Git, or Terraform Registry modules.
 
----
-
-## 8. `data` Block
-
+8. `data` Block
 Reads existing infrastructure (does not create).
-
 ```hcl
 data "aws_ami" "amazon_linux" {
   most_recent = true
@@ -163,14 +127,11 @@ data "aws_ami" "amazon_linux" {
 }
 ```
 
-### ✅ Key Points
-
+Key Points
 * Used for dynamic data like latest AMIs, existing subnets, VPC IDs.
 * Very useful for hybrid infra (Terraform + manual AWS setup).
 
----
-
-## ✅ Summary Table
+Summary Table
 
 | Block       | Description                                 | Example Resource                              |
 | ----------- | ------------------------------------------- | --------------------------------------------- |
@@ -185,3 +146,72 @@ data "aws_ami" "amazon_linux" {
 
 ---
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+running notes:
+--------------
+
+
+requirement: we need create a file and give only read access permission.
+file name : DevOps.txt and we should add string 
+here we are usig local provider
+create a folder on desktop name it terraform and iside it create folder local. open this folder from vscode --> open a folder
+create a file main.tf. we can give any name but extension should be .tf. in this main.tf we write code. copy the terraform block from local provider official documentation.
+we are using local provider and this local provider has only two resources 1.local_file 2.local_sensitive_file. we are using local provider to understand terraform workflow.
+we give required providers as local in terraform block
+give provider as "local"
+resource "local_file" "main"
+  filename=DevOps.txt
+if we didn't give file name it shows error because in official documentation of local provider it is mensioned as file name is mandatory and content is optional.
+all attributes like content, file permissions, are present in official documentation.
+after writing the script we need to initialise ----> terraform init
+by doing this all the information will be downloaded.
+if we go to our local folder .terraform directory is created and in this directory provider are info is downloaded.
+after initialization we need to check sysntax---> terraform validate ---> success
+terrafrom plan -----> it shows what type of resources will be created. and some information about the resource to be created.
+terraform apply-------> the resources written in main.tf file will be created. and statefile is created and information is stored in the statefile.
+it ask for confirmation. 
+information about the infra created is stored in state file.
+if we again use terraform apply it shows no changes 
+if we change the content in file to "devops with java and python" it shows that content in main.tf and statefile is different. we if apply again it is not necessary to re-initialise again, it is better to 
+check the terraform validate.
+when we do terraform plan it shows this is force replacement.
+we can check the data in statefile content:
+if we create another resource block with same alias name the resource will not be created. if alias name is same atleast resource type should be different.
+if add extra content to exixting resource like adding file content then the first resource is destroyed and again two resources are created.
+if two resources are created then the terraform state file has two resource sections.
+if we are not maintaining the state file when we apply for second time it will recreate agian. if statefile is present it will not be recreated.
+terraform destroy is used to destroy the resources.
+it will ask first to destroy.
+if we loss the main terraform file we have terraform backupfile(same).
+
+
+we can create ec2 instances by using the terraform.
+create a seperate folder aws_ec2.
+
+
+
+
+
+
+
+
+
+
+in windows if we go to a filel and ---> right click---> open in terminal then terminal will open in same location.
+check terraform version : terraform --version
