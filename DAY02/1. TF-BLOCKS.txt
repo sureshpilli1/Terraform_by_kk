@@ -241,3 +241,90 @@ if you want to create a new server create another resource block.
 
 in windows if we go to a filel and ---> right click---> open in terminal then terminal will open in same location.
 check terraform version : terraform --version
+
+
+
+
+
+
+
+chat gpt explaination:
+----------------------
+what is the difference between 
+
+
+| Block                                      | Responsibility                                                                 |
+| ------------------------------------------ | ------------------------------------------------------------------------------ |
+| `terraform { required_providers { ... } }` | Specifies **what provider plugin to download** and its version/source          |
+| `provider "aws" { ... }`                   | Configures **how to use** that provider (region, credentials, endpoints, etc.) |
+
+
+Easy Memory Trick
+required_providers = Install
+provider = Configure
+
+Think of it like installing an application on your laptop:
+
+required_providers says: Download and install Google Chrome version X.
+provider says: Open Chrome with this profile, these settings, and this home page.
+
+
+flow of execution:
+
+main.tf
+   │
+   ▼
+terraform {
+    required_providers
+}
+   │
+   ▼
+terraform init
+   │
+   ▼
+Downloads Provider Plugin
+   │
+   ▼
+provider "aws" {
+    region = "ap-south-1"
+}
+   │
+   ▼
+terraform plan
+terraform apply
+   │
+   ▼
+Creates AWS Resources
+
+
+
+what is the difference between provider block and resource block:
+
+| Provider Block                         | Resource Block                                  |
+| -------------------------------------- | ----------------------------------------------- |
+| Connects to the cloud                  | Creates infrastructure                          |
+| Specifies region                       | Specifies resource details                      |
+| Specifies credentials/profile          | Specifies AMI, instance type, bucket name, etc. |
+| One provider can manage many resources | Each resource creates one infrastructure object |
+
+
+work flow:
+----------
+Terraform
+     │
+     ▼
+Provider Block
+     │
+     ▼
+Connect to AWS
+Region = ap-south-1
+Profile = default
+     │
+     ▼
+Resource Block
+     │
+     ▼
+Create EC2
+Create S3
+Create VPC
+Create IAM User
