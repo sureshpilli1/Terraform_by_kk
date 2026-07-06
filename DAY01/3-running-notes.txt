@@ -1,7 +1,0 @@
-destroy the ec2 instance we created ---> terraform destroy --auto-approve
-check in the gui in the region we created the resource.
-aws configure list-----> gives the configuration details.
-we can define access key and secret key in porvider block.
-  create an IAM user----> username user1
-  privide user access to aws management console---> custome password-----> disable to reset new password---> create user
-  login this user from another browser give a user ID or alias name
