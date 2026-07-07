@@ -12,6 +12,15 @@ we give required providers as local in terraform block
 give provider as "local"
 resource "local_file" "main"
   filename=DevOps.txt
+explaination:
+Resource Name : main
+Actual File   : hello.txt
+
+"main"is Terraform's identifier,
+analogy:
+Roll Number : 101
+Name        : Suresh
+
 if we didn't give file name it shows error because in official documentation of local provider it is mensioned as file name is mandatory and content is optional.
 all attributes like content, file permissions, are present in official documentation.
 after writing the script we need to initialise ----> terraform init
