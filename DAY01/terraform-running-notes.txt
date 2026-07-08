@@ -143,6 +143,39 @@ we have multiple meta arguement
 4. depends-on-meta
 5. life-cycle-meta 
 
+count meta arguement:
+When to Use count
+Use count when:
+You need multiple identical resources.
+The only difference between them is usually an index or a small value.
+Examples:
+3 EC2 instances
+5 local files
+10 S3 buckets (with different names)
+4 IAM users
+Using count.index
+Usually, you don't want all three resources to have the same filename. You can use the built-in variable count.index.
+we can create multiple instances of a resource or a module with single block.
+for example we want to create two instaces, we copy the same resource block and duplicate the block and change alias name to "main1" to "main2". it is very difficult to do this for more instances.
+so we use meta arguement called "count" in the resource block
+count = 2
+terraform apply --auto-approve.
+two instances will be created and we can observe the details of two instances before approving by "yes"
+observe in the UI. 
+tip: if you want to filter only running instace in GUI search find instances by attributor or tag----> instance state = running
+two instances got created, but with same tags as we didn't change the tags. instance ID are different.
+count has multiple usecases.
 
+how to give different tags for each instance. an index called count.index to be added.
+in count meta argurment index value is to be accessed.
+count.index is a special variable available only when you use count.
+tags = {
+name = "webserver${count.index=1}" 
+}
+index always starts with 0 and then increments.
+terraform apply
+it is inplace update it only changes the parameters without deleting exixting instances. instance ID is same.
+in force update instance is terminated and recreated again. eg. changing ami id.
 
-
+conditional resource creation:
+ternary operator---> if condiiton is true
