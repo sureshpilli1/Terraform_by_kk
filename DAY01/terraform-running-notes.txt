@@ -53,7 +53,7 @@ create a new file main.tf where we write terrafrom code.
 provider is aws here.
 google aws provider in terraform. copy the provider information and paste in terraform file.
 inside provider define region "ap-sount-1".
-search inside official terraform documentation aws_instance. in arguement section mandatory parameters and optional parameters are present. 
+search inside official terraform documentation aws_instance or we can google. in arguement section mandatory parameters and optional parameters are present. create a resource block
 while creating an instance there is no mandatory fields(mentioned in document). default vpc default values are assigned.
 write resorce in terraform script "aws_instance" and its name "main"
 in general we give ami id. for ami id go to aws----> ec2----->amicatalog copy the ami id give in the terraform script ami = "ami-00ce22601d4c605f"
@@ -109,7 +109,40 @@ he don't have any permission related to acces key. access denied to iam List acc
 go to that user ----> add permissions----> attach policies directly-----> serach in permission policies admin----> selcect adminstrator access---> add permission
 go to security credentials tab and refresh---> now create access key is enabled ---> create access key----> select command line interface---> next---> give name as test-key--->create access key
 now copy the access key and secret key of user1
-we can place these access key and secret key in terraform script.
+we can place these access key and secret key in terraform script in provider block.
 if we do aws configure list
+now run terraform run
+it try to create an instance using access key and secret key given in the script.
+terraform apply
+ec2 instance got created. here the access key and secrete key that we given in provider block has priority than access key that we configured in cli.
+if we destroy the instance by terraform destroy the instance, it will be destroyed if the user has ec2 delete permission.
+it is not good to hard code the access key and secret key
+we need to create a profile.
+remove the access and secret key in the terraform file and save the file.
+what is a profile ----> adding multiple users/accounts to console is called profile.
+command to list all the profiles we set 
+aws configure list-profiles
+i want to create a profile for user1
+aws configure --profile user1
+it asks for aws access key and secret key. give those we already saved in word.
+in provider block we have a prameter called profile.
+profile = "user1"
+terraform apply 
+if we confirm yes it wil add one resource.
+in real time if we handle two accounts we create a profile if only one account we directly configure it.
+we can set access key and secret key in profile in provider block. by default it is mapped to account we configured.
+if the code in the terraform file is not in correct format like space there is no issue if we do terraform validate there wil be no issue. if we want to make the script in correct format ----> 
+terraform fmt
+
+
+meta arguements:
+we have multiple meta arguement
+1. count-meta
+2. for-each-meta
+3. provider-meta 
+4. depends-on-meta
+5. life-cycle-meta 
+
+
 
 
