@@ -153,7 +153,9 @@ Examples:
 5 local files
 10 S3 buckets (with different names)
 4 IAM users
+
 Using count.index
+-----------------
 Usually, you don't want all three resources to have the same filename. You can use the built-in variable count.index.
 we can create multiple instances of a resource or a module with single block.
 for example we want to create two instaces, we copy the same resource block and duplicate the block and change alias name to "main1" to "main2". it is very difficult to do this for more instances.
@@ -178,6 +180,7 @@ it is inplace update it only changes the parameters without deleting exixting in
 in force update instance is terminated and recreated again. eg. changing ami id.
 
 conditional resource creation:
+------------------------------
 ternary operator---> if condiiton is true 
 
 variable "create instance"{
@@ -308,8 +311,9 @@ resource "aws_iam_user" "department_users" {
 }
 
 
-
-
+i want to give adminstrator access.
+to attach a policy we should use another resource "aws_iam_user_policy_attachment"
+required parameter in this policy ----> goto official documentation and search----> user and policyarn are mandatory parameters
 
 
 
