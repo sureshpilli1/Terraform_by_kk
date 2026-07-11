@@ -313,7 +313,66 @@ resource "aws_iam_user" "department_users" {
 
 i want to give adminstrator access.
 to attach a policy we should use another resource "aws_iam_user_policy_attachment"
-required parameter in this policy ----> goto official documentation and search----> user and policyarn are mandatory parameters
+required parameter in this policy ----> goto official documentation and search----> user and policy_arn are mandatory parameters in argument reference
+
+variable "iamusers"{
+ default = [ "kk1","kk2","kk3" ]
+}
+resource "aws_iam_user" "main"{
+ for_each = toset(var.iamusers)            
+ name = each.key                           
+ tags = {
+ team = "Opsteam"
+ createdby = "terraform"
+}
+}         
+resource "aws_iam_user_policy_attachment" "main1" {                                        we can give "main" also as resource is different
+  for_each = toset(var.iamusers)                                                           go to iam---> policies---->search adminstrator access-----> copy the arn 
+  user = each.key
+  policy_arn = "arn:aws:iam::aws:policy/AdminstratorAccess" 
+  depends_on = [ aws_iam_user.main ] 
+}
+
+terraform apply --auto-approve
+check in gui admins access is given
+
+here users are created first and then permissions are attached later. it is called dependency
+we write depends_on = [aws_iam_user.main]  it's meaning after creating users only this resource block is executed.
+
+terraform destroy --auto-approve
+
+
+provider meta argument:
+----------------------
+upto now we launched all instances in mumbai region only. but our requirement is one ec2 in mumbai, another in tokyo, another in us.
+to achieve this we declare multiple providers and alias names. we can give anything as alias name like mumbai, suresh etc. 
+we can get the region names from AWS
+
+provider "aws" {
+ alias = "mumbai"
+ region = "ap-south-1"
+}
+provider "aws" {
+ alias = "singapore"
+ region = "ap-southeast-1"
+}
+resource "aws_instance" "main1"{
+   provider = aws.mumbai
+ ami = "........."
+ instance_type = "t2.samll"
+}
+resource "aws_instance" "main2"{
+  provider = aws.singapore
+ ami = "........."
+ instance_type = "t2.medium"
+}
+ 
+if we don't give provider information in resource block resource will be created in default region which we gave while configuring aws credentials. 
+in resource block we are using porvider as meta argument. it throws error if we copied ami from one region and try to create instance in another region. 
+so we should go to ami catalog of singapore region and copy the ami id. same for instance type also it should be available in region we are tyring to create.
+
+
+
 
 
 
