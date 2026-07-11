@@ -366,10 +366,50 @@ resource "aws_instance" "main2"{
  ami = "........."
  instance_type = "t2.medium"
 }
- 
+
+terraform apply 
+go to the mumbai region and singapore region and chek the instance created.if we want to do region specific activities we need use provider meta argument. 
+
 if we don't give provider information in resource block resource will be created in default region which we gave while configuring aws credentials. 
 in resource block we are using porvider as meta argument. it throws error if we copied ami from one region and try to create instance in another region. 
 so we should go to ami catalog of singapore region and copy the ami id. same for instance type also it should be available in region we are tyring to create.
+
+terraform destory --auto-approve
+
+
+in day5 notes examples are given 
+creating s3 buckets in dev and prod envirnments and access key and secret key. bucket is created in dev envirnment by taking access key and secret key in dev.
+
+multi regin vpc creation:
+one alia is created for us-east-1, ap-south-east one alias.
+out put block is written to display out put in console after creation of instance.
+all these will be disscussed later.
+
+full terraform code is given in the notes
+
+implicit dependency:
+-------------------
+bydefault we have dependency for example we can't create subnet without vpc.
+
+ingress ----> ingress
+outbound traffic ----> egress
+protocol = "-1" -----> all traffic
+it is better to write depends on meta argument for implicit and explicit dependency
+instance will not be created untill security group is created this is done by depends on meta argument.
+file generation before uploading to s3.
+force destory = "true" ----> we can destory the bucket also
+
+practice with examples given in the notes
+
+
+
+lifecycle meta argument:
+------------------------
+1. create_before_destory
+2. prevent_destroy
+3. ignore_changes
+
+
 
 
 
