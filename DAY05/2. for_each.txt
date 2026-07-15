@@ -154,3 +154,16 @@ notes from chatgpt:
 | --------- | ----------------------------- | ------------------------------ | -------------- |
 | **List**  | Ordered collection of values  | `count.index` or list indexing | `count`        |
 | **Map**   | Collection of key-value pairs | `each.key` and `each.value`    | `for_each`     |
+
+
+If an interviewer asks:
+Why do we use toset() with for_each?
+A good answer is:
+"for_each accepts maps and sets, but not lists. When our data is in a list, we use toset() to convert it into a set so that for_each can iterate over it.
+If the data is already a map, no conversion is needed because for_each can iterate over maps directly."
+
+| Variable Type | Example                         | Need `toset()`? | Works with `for_each`? |
+| ------------- | ------------------------------- | --------------- | ---------------------- |
+| **List**      | `["alice", "bob"]`              | ✅ Yes           | ✅ After `toset()`      |
+| **Set**       | `toset(["alice", "bob"])`       | ❌ Already a set | ✅ Yes                  |
+| **Map**       | `{ alice = "dev", bob = "qa" }` | ❌ No            | ✅ Yes                  |
