@@ -397,28 +397,199 @@ terraform destory --auto-approve
 
 
 in day5 notes examples are given 
-creating s3 buckets in dev and prod envirnments and access key and secret key. bucket is created in dev envirnment by taking access key and secret key in dev.
+creating s3 buckets in dev and prod envirnments and access key and secret key. bucket is created in dev envirnment by taking access key and secret key in dev. 
+by using alias we can get the access key and secret key of the respective envirnment. instead of hard coding the keys we can create profile.
+
+provider "aws" {
+  alias      = "prod"
+  region     = "us-west-2"
+  access_key = "PROD_KEY"
+  secret_key = "PROD_SECRET"
+}
+
+provider "aws" {
+  alias      = "dev"
+  region     = "us-east-1"
+  access_key = "DEV_KEY"
+  secret_key = "DEV_SECRET"
+}
+
+resource "aws_s3_bucket" "prod_bucket" {
+  provider = aws.prod
+  bucket   = "prod-bucket-kkfunda"
+  acl      = "private"
+}
+
+resource "aws_s3_bucket" "dev_bucket" {
+  provider = aws.dev
+  bucket   = "dev-bucket-kkfunda"
+  acl      = "private"
+}
+
+
 
 multi regin vpc creation:
-one alia is created for us-east-1, ap-south-east one alias.
+-------------------------
+one alia is created for us-east-1, ap-south-east one alias. we need two vpc one in us-ease-1 and another vpc in singapore region.
+
+provider "aws" {
+  alias  = "use1"
+  region = "us-east-1"
+}
+
+provider "aws" {
+  alias  = "apse1"
+  region = "ap-southeast-1"
+}
+
+resource "aws_vpc" "use1_vpc" {
+  provider = aws.use1
+  cidr_block = "10.0.0.0/16"
+}
+
+resource "aws_vpc" "apse1_vpc" {
+  provider = aws.apse1
+  cidr_block = "10.1.0.0/16"
+}
+
+
+provider block usecase:
+----------------------
+
+
+# --------------------------------------------
+# 🔧 Provider Configurations for Two Regions
+# --------------------------------------------
+
+provider "aws" {
+  alias  = "mumbai"
+  region = "ap-south-1"
+}
+
+provider "aws" {
+  alias  = "singapore"
+  region = "ap-southeast-1"
+}
+
+# --------------------------------------------
+# 💻 Dev EC2 Instance in Mumbai (1 Instance)
+# --------------------------------------------
+
+resource "aws_instance" "dev_server" {
+  provider      = aws.mumbai
+  ami           = "ami-0abcdef1234567890"   # ✅ Replace with Mumbai AMI
+  instance_type = "t2.micro"
+  key_name      = "dev-key"                 # ✅ Replace with your Mumbai key name
+  count         = 1
+
+  tags = {
+    Name = "Dev-Mumbai"
+    Env  = "dev"
+  }
+}
+
+# --------------------------------------------
+# 💻 Prod EC2 Instances in Singapore (2 Instances)
+# --------------------------------------------
+
+resource "aws_instance" "prod_servers" {
+  provider      = aws.singapore
+  ami           = "ami-0fedcba9876543210"   # ✅ Replace with Singapore AMI
+  instance_type = "t2.micro"
+  key_name      = "prod-key"                # ✅ Replace with your Singapore key name
+  count         = 2
+
+  tags = {
+    Name = "Prod-Singapore-${count.index}"
+    Env  = "prod"
+  }
+}
+
+# --------------------------------------------
+# 📤 Outputs (Optional: To Show IPs After Apply)
+# --------------------------------------------
+
+output "dev_server_public_ip" {
+  value = aws_instance.dev_server[0].public_ip
+}
+
+output "prod_servers_public_ips" {
+  value = [for instance in aws_instance.prod_servers : instance.public_ip]
+}
+
 out put block is written to display out put in console after creation of instance.
 all these will be disscussed later.
 
+
+
 full terraform code is given in the notes
+
 
 implicit dependency:
 -------------------
-bydefault we have dependency for example we can't create subnet without vpc.
+by default we have implicit dependency, for example we can't create subnet without vpc.
+in the below tf file we are trying to create aws instance in mumbai region
+first sg is created and then ec2 instance is created in the below example.
+with out sg also we can launch ec2, but default values are asigned.
 
-ingress ----> ingress
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "6.0.0-beta1"
+    }
+  }
+}
+
+provider "aws" {
+ alias = "mumbai"
+ region = "ap-south-1"
+}
+
+resource "aws_instance" "dev" {
+    provider = aws.mumbai
+    vpc_security_group_ids = [aws_security_group.main-sg.id ]
+    ami = "ami-0038df39db13a87e2"
+    instance_type = "t2.small"
+    tags = {
+      Name = "dev-server1"
+    }
+}
+
+resource "aws_security_group" "main-sg" {
+    name = "dev-server-sg"
+    description = "It will allow all traffic"
+    ingress {
+        from_port = 0
+        to_port = 0
+        protocol = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
+    egress {
+        from_port = 0
+        to_port = 0
+        protocol = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+
+    }
+    tags = {
+      Name = "test-sgs"
+    }
+
+   
+}
+
+inbund traffic ----> ingress
 outbound traffic ----> egress
-protocol = "-1" -----> all traffic
-it is better to write depends on meta argument for implicit and explicit dependency
+protocol = "-1" -----> all traffic. ( we can give TCP, UDP, SSH etc).
+apply the above code and check all the resources.
+
+it is better to write depends on meta argument for implicit and explicit dependency. 
 instance will not be created untill security group is created this is done by depends on meta argument.
-file generation before uploading to s3.
+withot s3 bucket we cannot upload file. file generation before uploading to s3. 
 force destory = "true" ----> we can destory the bucket also
 
-practice with examples given in the notes
+practice with examples given in the notes of day 5 dependency
 
 
 
@@ -428,20 +599,34 @@ lifecycle meta argument:
 2. prevent_destroy
 3. ignore_changes
 
+IQ: when did you use life cycle meta argument explain
+
+1.create_before_destroy:
+create an ec2 instance by using tf file. it create an ec2 instance in mumbai region.
+check in mumbai region.
+for example i want to change something like changing the instance name from "main1" to "main2"  or ami id and apply the terrafomr file, first instance will be terminated and new instance will be created.
+so application down time will be there as first instance is destroyed first and then second instance is created. 
+so if new instance is created first and then old instance destroyed there will be no down time.
+
+life cycle {
+ create_before_destroy = true
+}
 
 
+2.prevent destroy:
+------------------
+if some one have the access to cli and by mistake if some one applied terraform destroy then application will be stopped.
+so to avoid this we can give prevent destroy meta argument. 
 
+prevent destroy= true
 
+3.ignore changes:
+---------------
+suppose we edited a name tag in AWS UI but in local terrafrom state file tag is different. 
+if we apply the code the in local the tag will become normal in UI as given in the local 
 
-
-
-
-
-
-
-
-
-
+ignore_changes = [ tags ]
+we if reapply the code the tag will be remain same in UI.
 
 
 
