@@ -851,10 +851,55 @@ resource "aws_instance" "public_ec2" {
   }
 }
 
-we creat security group in our custom vpc.
+we creat security group in our custom vpc. for AMI id go to AMI catalog. subnet is also mensioned.
 if we don't have a key we have to write seperate resource block and create it but if have a key already we can give the key name.
 
 terraform apply
+go to gui and connect in gitbash
+if you are not able to connect make sure that ssh port is enabled
+
+ping google.com
+it is sending the icmp packets 
+if we want to increase the number of instances give the count.
+if we give 200 instead of 2 200 will be created. to avoid this create a variable "instance_count"
+  variable "instance_count"
+   type = number
+   default = 20
+   description = "it indicates how many instances creating"
+
+and we read this variable as below in resource block
+   count = var.instance_count
+it is creating 20 resources  it is not recomended. so we need to define condition inside variable block. default=20 should be conditioned. condition is given by validation block.
+it best practice to defene condition for a varaible
+
+  variable "instance_count"
+   type = number
+    validation{
+     condition = var.instance_count < 6
+     error_message= "please enter valid instance count"
+    }
+   description = "it indicates how many instances creating"
+  default = 3
+
+terraform plan it shows 3 instances are going to create.
+but if change the default = 20 and terraform plan it gives an error
+
+
+
+CLI is better than GUI because the code is in our control and we can see all the code
+
+google terraform code to diagram ---> erasor.io----> paste the terraform code----> it will create diagram
+
+interview questions of a candidate:
+did you create provisioners in provisioners
+
+what is autoscaling how to create autoscaling how it works in case of server down.
+
+question terraform state: file what do you do incase of loss of terraform statefile. terraform state file is not in GBs. so we do backup for every 15 min before executing the script. 
+in every provision we auto upload to s3 and enable lifecycle so it will go to glassior for 30 day or 60 day. so even if we loss state file backup file will be there. 
+we can do it through import but it will take time
+
+terraform refresh command------> it is used to sync current state and desired state(local code and infra)
 
 
 
@@ -865,9 +910,53 @@ terraform apply
 
 
 
+DAY5 RUNNING NOTES:
+-------------------
+what is variable :
+variable is name of a memory location
+int a = 50
+here 
+int is a data type
+a is variable name 
+= is operatory
+50 is value
+what is the need ---> 
 
+open a terminal in vpc folder we created
+terraform init
+create a ec2 machine
+instead of hard coding ami id availability zone etc we can declare them in varables
 
+variable "ami"{
+  type = string
+  default = "ami-errrwr"      (ami we want to give)
+  description = "this variable is rehat ami info" (description is optional)
+}
+variable "availability zone"{
+ type = "string"
+ default = "ap-south-1a"
+ description = "AZ"
+}
+variable "instance_type"{
+  type = "string"
+  default = "t3.small"
+  description = "IT"
+}
+variable "tags"{
+  type = "string"
+  default = "web-server"
+  description = "test-tag"
+}
+ in resource block we call the variables 
 
+resource "aws_instace" "main" {
+ ami = var.ami
+ availability_zone = var.availability_zone
+ instance_type = var.instance_type
+ tag ={
+   Name = var.webserver
+ }
+}
 
 
 
