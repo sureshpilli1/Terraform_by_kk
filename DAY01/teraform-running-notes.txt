@@ -927,6 +927,22 @@ terraform init
 create a ec2 machine
 instead of hard coding ami id availability zone etc we can declare them in varables
 
+terraform {
+  required_provider{
+    aws ={
+     source = "hashicorp/aws"
+     version = "6.28.0"
+    }
+  }
+}
+variable "region"{
+ type = string
+ default = "ap-south-1"
+}
+provider "aws"{
+ alias = "mumbai"
+ region = var.region
+}
 variable "ami"{
   type = string
   default = "ami-errrwr"      (ami we want to give)
@@ -947,9 +963,15 @@ variable "tags"{
   default = "web-server"
   description = "test-tag"
 }
+variable "instance_count"{
+  type = number
+  default =3 
+  description = "this is instance count"
+}
  in resource block we call the variables 
 
 resource "aws_instace" "main" {
+ count = var.instance_count
  ami = var.ami
  availability_zone = var.availability_zone
  instance_type = var.instance_type
@@ -957,6 +979,128 @@ resource "aws_instace" "main" {
    Name = var.webserver
  }
 }
+
+terraform plan
+
+it is not mandatory to define default value, if we removed or commented the default value of count it will not create any instance it ask at run time  as shown below.
+
+terraform plan 
+var.instance_count
+  this is instance count 
+    enter a value:
+
+if we don't give default value for any variable it will ask at run time.
+
+Input variables allow you to customize Terraform modules without changing the code. These variables are defined using the variable block and can be passed in different ways.
+If is I want to create with a different then we can chage the variables without changing the code.
+we create variable for region also
+
+
+we can remove all variable from main.tf and paste them in a seperate file variable.tf we can access these variable from variabe.tf
+
+variable "ami"{
+  type = string
+  default = "ami-errrwr"      (ami we want to give)
+  description = "this variable is rehat ami info" (description is optional)
+}
+variable "availability zone"{
+ type = "string"
+ default = "ap-south-1a"
+ description = "AZ"
+}
+variable "instance_type"{
+  type = "string"
+  default = "t3.small"
+  description = "IT"
+}
+variable "tags"{
+  type = "string"
+  default = "web-server"
+  description = "test-tag"
+}
+variable "instance_count"{
+  type = number
+  default =3 
+  description = "this is instance count"
+}
+
+
+we can check it is accessing variable from variable.tf file by changing the ami and doing terraform plan
+
+we can create a seperate file for variables--------> terraform.tfvars
+create a file terraform.tfvars in vscode and keep all values in it 
+region = "us-east-a"
+ami = "123456"
+instance_count = 4
+instance_type = "x2.large"
+
+first priority is for .tfvars
+it takes the values from .tfvars if both variable.tf and terraform.tfvars
+
+we can write a seperate output.tf file for out put block
+
+output "instance_id"{
+ description = "id of the ec2 instance"
+ value = aws_instance.ec2_instance_id
+}
+
+output "public_ip"{
+ description= "public ip of the ec2 instance"
+ value = aws_instance.ec2_instance_public_ip
+}
+
+out put displayed after apply only
+if we want to display private ip which is created after apply only????
+
+instance_id should be replace with main.id and  main.public_ip as we gave "main" in main.tf
+
+goto .tfvars and give correct ami id and instance type instance count and apply terraform
+it gave an error so he commented the count in main.tf saying it should be read throug index and again terraform apply
+after creating the instance it gave the output instance id and public ip
+terraform destroy
+
+inside a variable we can define validation with condition and error message
+variable "instance_type" {
+  type = string
+
+  validation {
+    condition     = contains(["t2.micro", "t2.small", "t3.micro"], var.instance_type)
+    error_message = "Allowed values: t2.micro, t2.small, t3.micro"
+  }
+}
+in the above variable other than the instaces mensioned in the condition we couldnot provision other instancetype.
+it is best practice to define validation to every variable 
+
+variable "instance_type"{
+  type = "string"
+  default = "t3.small"
+  validation {
+    condition     = contains(["t2.micro", "t2.small", "t3.micro"], var.instance_type)
+    error_message = "Allowed values: t2.micro, t2.small, t3.micro"
+   }
+  description = "IT"
+
+}
+
+change the instance type to t2.large and terraform plan it will not allow.
+IQ:how can you restruct----> by defining validation
+
+for sensitive information
+
+
+
+to comment all the lines in a file we use ctrl space kc and to uncomment them ctrl space z
+
+
+
+
+
+
+
+
+
+
+
 
 
 
