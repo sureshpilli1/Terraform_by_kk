@@ -1068,7 +1068,7 @@ variable "instance_type" {
     error_message = "Allowed values: t2.micro, t2.small, t3.micro"
   }
 }
-in the above variable other than the instaces mensioned in the condition we couldnot provision other instancetype.
+in the above variable other than the instaces mensioned in the condition we cann'ot provision other instancetype.
 it is best practice to define validation to every variable 
 
 variable "instance_type"{
@@ -1082,10 +1082,40 @@ variable "instance_type"{
 
 }
 
-change the instance type to t2.large and terraform plan it will not allow.
-IQ:how can you restruct----> by defining validation
+change the instance type to t2.large and terraform plan it will not allow. if we try t3.micro it will allow to create.
+IQ:how can you restrict to launch a certain insatance----> by defining validation
 
-for sensitive information
+sensitive variable: we should give sensitive = true
+------------------
+
+then it the values from terraform logs and output
+
+variable "db_password" {
+  type      = string
+  sensitive = true
+}
+
+real time usecase:
+Use Case	                      Benefit of Input Variables
+Multi-environment support	      Define variables per environment (dev.tfvars, prod.tfvars)
+CI/CD pipelines               	Inject values from external systems (e.g., Jenkins, GitHub Actions)
+Infrastructure modularity     	Reuse the same code for different configurations
+
+create a dev.tfvars (he renamed terraform.tfvars), prod.tfvars with different region, ami, instance count, instance type and do terraform plan.
+it takes the input from default variables.tf not from prod.tfvars or dev.tfvars as there is an ambiguity.
+but if we want to take variables from tfvar files we should give --var-file
+
+terraform plan --var-file dev.tfvars
+ but he got region that is not defined in dev.tfvars reason may the the profile but the other variable are from dev.tfvars
+
+rules:
+-----
+in any programming language
+what is camel notation ---> bankAddress ---> here first word is small and the second word first letter is capital.
+for notes refer material
+we can psss the variable in CLI also, it will override terraaform script.
+terraform plan --var="availability_zone=pppp"
+
 
 
 
@@ -1093,6 +1123,31 @@ to comment all the lines in a file we use ctrl space kc and to uncomment them ct
 
 
 
+DAY6 RUNNINGNOTES:
+------------------
+creating the VPC with variable:
+
+open the vs code 
+open the terminal and destroy previous resouce
+terrafomr destroy --auto-approve
+login to aws console
+delete all the files we created
+create a floder vpc_var
+open the terminal here
+open in vscode
+create a file main.tf copy the terraform block
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "6.28.0"
+    }
+  }
+}
+create a file provider.tf
+provider "aws" {
+  region = var.aws_region
+}
 
 
 
