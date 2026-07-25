@@ -1149,9 +1149,135 @@ provider "aws" {
   region = var.aws_region
 }
 
+create a file variables.tf and copy all the variable from notes and copy in variables.tf file
+
+# Global Settings
+variable "aws_region" {
+  description = "AWS region to deploy into"
+  type        = string
+  default     = "ap-south-1"
+}
+
+variable "environment" {
+  description = "Environment name for tagging"
+  type        = string
+  default     = "prod"
+}
+
+variable "common_tags" {
+  description = "Common tags to apply to all resources"
+  type        = map(string)
+  default     = {
+    WrittenBy = "kkfunda"
+  }
+}
+
+# VPC & Subnets
+variable "vpc_cidr" {
+  description = "CIDR block for the VPC"
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
+variable "public_subnets" {
+  description = "Public subnet CIDRs and AZs"
+  type = map(object({
+    cidr = string
+    az   = string
+  }))
+  default = {
+    public1 = { cidr = "10.0.1.0/24", az = "ap-south-1a" }
+    public2 = { cidr = "10.0.2.0/24", az = "ap-south-1b" }
+  }
+}
+
+variable "private_subnets" {
+  description = "Private subnet CIDRs and AZs"
+  type = map(object({
+    cidr = string
+    az   = string
+  }))
+  default = {
+    private1 = { cidr = "10.0.3.0/24", az = "ap-south-1a" }
+    private2 = { cidr = "10.0.4.0/24", az = "ap-south-1b" }
+  }
+}
+
+# EC2 Settings
+variable "ami_id" {
+  description = "AMI ID to use for EC2 instances"
+  type        = string
+  default     = "ami-0038df39db13a87e2"
+}
+
+variable "instance_type" {
+  description = "Instance type for EC2"
+  type        = string
+  default     = "t2.micro"
+
+  validation {
+    condition     = can(regex("^t[23]\\.", var.instance_type))
+    error_message = "Only t2.* or t3.* instance types are allowed."
+  }
+}
+
+variable "key_name" {
+  description = "Name of the key pair to SSH into instances"
+  type        = string
+  default     = "kkdevopsb5"
+}
 
 
+in instance type part we used regular expression there is a concept called theory of competance
+  validation {
+    condition     = can(regex("^t[23]\\.", var.instance_type))
+    error_message = "Only t2.* or t3.* instance types are allowed."
+  }
 
+if you have a key pair you can use that key pair
+
+i want to create a aws key pair in mumbai region please give terraform script ask chatgpt
+terraform init 
+terrafrom apply
+error occured as key pair is different
+we can connect to the instances created if there is any problem then check the security group and ports
+
+we have seperate statefile for this
+
+terraform destroy
+
+workspace:
+----------
+after apply statefile is created. information about the infrastructure created in aws is stored in statefile.
+for example we are reading the variables from dev.tf vars creating infra for dev invirnment. this info is present in statefile. 
+next we got a requirement of creating infra for production if we change the code according to production requirements then current state and desired state will be mismatched. statefile is mismatched.
+so infrastructure resources will be impacted and got deleted new entries added in statefile, new infra will be provisioned. so dev env is effected.
+
+so best practice is to maintain a seperate statefile for every environment. that to in remote backend S3.
+
+To get a seperate statefile for environment we need to go for workspace.
+
+we create a file dev.tfvars and copy the variables and change them accordig to dev env.
+it is time taking so he pasted the code in ai and asked for same code please give for dev and qa sperate files it may give random cidr we can change the cidr as per our requirement.
+it gave key and pairs without blocks.
+change the key name and ami id according to region.
+save the code in dev.tfvars and qa.tfvars files 
+
+qa and dev CIDR blocks are different two VPC are going to created
+observe in state file resource section is empty as we didn't apply
+terraform apply --var-file=dev.tfvars
+check in the gui
+we have only one statefile
+we apply the qa.tfvar file all infra will be chaged. try by using command apply --var-file=qa.tfvars dono't give yes
+2 resources will be changed and 15 will be destroyed and tags will be changed
+so we need to go for workspace in terraform
+
+terraform destroy
+
+terraform work space
+this gives the terraform command list
+terraform work space list 
+gives the work space list
 
 
 
