@@ -1332,6 +1332,65 @@ only one resource will be destoryed ec2 remain
 
 
 
+DAY7 RUNNING NOTES:
+-------------------
+connect to AWS console 
+create ec2 and vpc as given in the last class
+got ec2 and vpc in gui
+a statefile is created in our local and all the records are maintained
+if the state file is deleted (delete the backup file also)
+if we apply agian it will recreate the resources but we already have the resources so there is a chance of duplication of infra.
+how can we create a statefile-----> using terraform import instanceid 
+terraform import aws_instance.main i-1235666
+it is successfully imported we can see statefile in the local
+terraform import aws_vpc.main vpc-65461654
+now vpc also imported
+if we apply now current state and desired state are same
+now delete statefile and backupfile
+we can import through cli or we can create a seperate file 0---->mport.tf
+import {
+ to = aws_instance.main
+ id = "i-152552"
+}
+import {
+ to = aws_vpc.main
+ id = "vpc-123456"
+}
+
+terraform apply
+we can see we not adding anything 
+we can check the terraform.tfstate
+
+
+DATA SOURCES:
+------------
+we are getting the ami id from aws. we can retrive them by using data source without hardcoding.
+terraform destroy
+copy the code from the notes
+create provder.tf, variables.tf, datasource.tf
+
+datasource.tf
+# ── 1. Latest Amazon Linux 2 AMI ───────────────────────────────────
+data "aws_ami" "amazon_linux" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+}
+
+# ── 2. Get ALL available AZs in the chosen region ──────────────────
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+we should be able to write filters in terraform 
+in the above script they are filtering the ids based on hvm
+
+
+
 
 
 
