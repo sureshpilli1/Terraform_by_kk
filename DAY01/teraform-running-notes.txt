@@ -1275,9 +1275,57 @@ so we need to go for workspace in terraform
 terraform destroy
 
 terraform work space
-this gives the terraform command list
+this gives the terraform workspace command list
 terraform work space list 
 gives the work space list
+
+to create a new work space
+terraform workspace new dev
+it will create and switch to new work sapce
+terraform workspace list 
+now it point to dev workspace (astrich)
+
+a new folder will be created in vpc-var-->terraform.tfstate.d-->dev
+terrafrom apply --var-file=dev.tfvars
+make sure that we are in dev workspace.
+17 resources are created in gui
+a seprate statefile is created in dev
+
+now if want to create qa
+terraform workspace new qa
+now create infra for qa
+terraform apply --var-file=qa.tfvars
+we can observe 0 change and 0 destroy a seprate vpc is created
+check the resource in gui
+
+terraform destroy
+
+terraform workspace list
+now iam in qa
+switch to dev
+if don't know the command
+type 
+terraform workspace 
+terraform workspace select dev
+terraform destroy --auto-approve
+don't run destroy command in realtime until you have approval
+
+terraform refresh ----> we can destroy in gui and sync
+
+terraform workspace select default
+
+create a simple ec2
+create a folder ec2 and open the folder
+open in vscode and create main.tf
+goto terminal in ec2 folder and do terraform init
+create a resource block for ec2 and vpc
+
+terraform apply --auto-approve
+
+after creating resource open the statefile 
+if we run destory the command all resources will be destoryed but i want to target specific resource
+terraform destory --target=aws_vpc.main
+only one resource will be destoryed ec2 remain
 
 
 
