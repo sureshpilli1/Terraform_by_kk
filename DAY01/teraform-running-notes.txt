@@ -1347,7 +1347,7 @@ terraform import aws_vpc.main vpc-65461654
 now vpc also imported
 if we apply now current state and desired state are same
 now delete statefile and backupfile
-we can import through cli or we can create a seperate file 0---->mport.tf
+we can import through cli or we can create a seperate file ---->mport.tf
 import {
  to = aws_instance.main
  id = "i-152552"
@@ -1368,7 +1368,7 @@ we are getting the ami id from aws. we can retrive them by using data source wit
 terraform destroy
 copy the code from the notes
 create provder.tf, variables.tf, datasource.tf
-
+(in provider block after giving porvider details it is showing error because we need to declare variables.)
 datasource.tf
 # ── 1. Latest Amazon Linux 2 AMI ───────────────────────────────────
 data "aws_ami" "amazon_linux" {
@@ -1388,9 +1388,133 @@ data "aws_availability_zones" "available" {
 
 we should be able to write filters in terraform 
 in the above script they are filtering the ids based on hvm
+in gui filters are there like public images etc. next in search bar there are many categories like virtualization, in virtula two types hvm and paravirtual in virtual many ami id are there.
+to choose ami id we should be able to write filters in terraform script.
+for availability zone google aws availability zone-----> data sources.
+
+next write main code
+mani.tf
+# Reusable tag helper
+locals {
+  tags = merge(var.common_tags, { Env = var.environment })
+}
+
+# VPC
+resource "aws_vpc" "demo" {
+  cidr_block = var.vpc_cidr
+  tags       = merge(local.tags, { Name = "kkfunda-vpc" })
+}
+
+# Public Subnet in FIRST available AZ
+resource "aws_subnet" "public_1" {
+  vpc_id                  = aws_vpc.demo.id
+  cidr_block              = var.public_subnet_cidr
+  availability_zone       = data.aws_availability_zones.available.names[0]
+  map_public_ip_on_launch = true
+  tags                    = merge(local.tags, { Name = "kkfunda-public-1" })
+}
+
+# Security Group (SSH only)
+resource "aws_security_group" "web_sg" {
+  name        = "kkfunda-web-sg"
+  description = "Allow SSH"
+  vpc_id      = aws_vpc.demo.id
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = merge(local.tags, { Name = "kkfunda-web-sg" })
+}
+
+# EC2 – uses both data sources!
+resource "aws_instance" "web" {
+  ami                         = data.aws_ami.amazon_linux.id
+  instance_type               = var.instance_type
+  subnet_id                   = aws_subnet.public_1.id
+  key_name                    = var.key_name
+  associate_public_ip_address = true
+  vpc_security_group_ids      = [aws_security_group.web_sg.id]
+
+  tags = merge(local.tags, { Name = "kkfunda-web" })
+}
+
+
+you can observe that ami is taken from datasource ----> data.aws_ami.amazon_linux.id
+
+correct key pair should be given in variables section by checking in our aws 
+
+terraform apply
+error occured due to import block he deleted the import file
+
+terraform destroy
+
+
+terraform functions:
+--------------------
+google terraform functions there many functions 
+if we want to know about a function write terraform console ---->in terminal then > comes --->then give the function you want to test. merge is also a function
+
+length metaargument and length function are different
+
+in terraform official documentation we have the complete information about function we can refer it
+
+for better understanding of functions in cidr ask chatgpt
+
+
+dyanmic blocks:
+---------------
+we have to write a block to open a port if we need to wrtie a block for every port then number of lines of code will be increased we can reduce this with help of dynamic blocks.
+we list all ports in a variable
+variable "ingress_ports" {
+  type = list(object({
+    port = number
+  }))
+  default = [
+    { port = 22 },
+    { port = 80 },
+    { port = 443 }
+  ]
+}
+while writing dynamic block repeate the loop
+
+dynamic "ingress" {
+    for_each = var.ingress_ports
+    content {
+      from_port   = ingress.value.port
+      to_port     = ingress.value.port
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  }
 
 
 
+DAY8 RUNNING NOTES:
+-------------------
+terraform remote backend s3 with dynamo db locking
+
+if I wrote a terraform code and applied it will create statefile in my local. this code is written in my laptop same time another user also wrote main.tf and applies it will create one more ec2.
+so there is chance of duplicate infra
+to overcome this we create a bucket in s3 and
+why we are using dynamodb s3 is enough to store state file ----> multiple people are using terraform together, there is chance of conflict 
+it takes some time when we apply the code. we have to lock the terraform file while doing changes to prevent other person to do apply.
+with help of dynamodb we create a lock for statefile so that one person can midify the infra at time.
+what is race condition
+
+create a bucket with help of script in given in the notes
+enable versioning using command
+create dynamo db tabel using command given in table
 
 
 
