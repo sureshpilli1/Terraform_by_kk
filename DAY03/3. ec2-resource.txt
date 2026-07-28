@@ -1,14 +1,8 @@
-
-
-## ✅ What is a Resource Block?
-
+What is a Resource Block?
 The `resource` block in Terraform is used to **define and manage cloud resources** like EC2 instances, S3 buckets, security groups, databases, etc.
-
 It tells Terraform **what to create**, **how to configure it**, and **how to track it** using the state file.
 
----
-
-## 📘 Basic Syntax
+Basic Syntax
 
 ```hcl
 resource "<PROVIDER>_<TYPE>" "<NAME>" {
@@ -30,28 +24,18 @@ resource "aws_instance" "web_server" {
 
 ---
 
-## 🔍 Breakdown of Components
-
-### 1. `resource`
-
+Breakdown of Components
+1. `resource`
 * Keyword to declare a Terraform-managed resource.
-
-### 2. `<PROVIDER>_<TYPE>`
-
+2. `<PROVIDER>_<TYPE>`
 * Identifies the **cloud provider** and **resource type**.
 * Example: `aws_instance` = EC2 instance from AWS.
-
-### 3. `<NAME>` (Local Name)
-
+3. `<NAME>` (Local Name)
 * Internal name for referencing inside Terraform config.
 * Does not affect cloud resource naming unless explicitly tagged or named.
 
----
-
-## 🛠 Inside the Block – Configuration Arguments
-
+Inside the Block – Configuration Arguments
 These are key-value pairs specific to the resource.
-
 Example for an EC2 instance:
 
 ```hcl
@@ -87,8 +71,7 @@ Creates/Modifies Resources using Provider APIs
 ```
 
 ---
-
-## 🔗 Referencing Resources
+Referencing Resources
 
 You can use attributes of resources in other blocks:
 
@@ -99,8 +82,7 @@ output "instance_ip" {
 ```
 
 ---
-
-## 📦 Example with Dependencies
+Example with Dependencies
 
 ```hcl
 resource "aws_vpc" "main" {
@@ -121,13 +103,13 @@ resource "aws_instance" "web" {
 
 ---
 
-## 🧠 Best Practices
+Best Practices
 
-* ✅ Use **meaningful names** (e.g., `web_server`, `db_instance`).
-* ✅ Use **variables** instead of hardcoding values.
-* ✅ Group related resources into **modules**.
-* ✅ Use `depends_on` sparingly – Terraform usually handles dependencies automatically.
-* ✅ Tag resources for identification and cost management.
+Use **meaningful names** (e.g., `web_server`, `db_instance`).
+Use **variables** instead of hardcoding values.
+Group related resources into **modules**.
+Use `depends_on` sparingly – Terraform usually handles dependencies automatically.
+Tag resources for identification and cost management.
 
 ---
 
