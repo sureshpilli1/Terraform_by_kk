@@ -1,16 +1,10 @@
-# Terraform `provider` Meta-Argument – Deep Dive with AWS Examples
-
+Terraform `provider` Meta-Argument – Deep Dive with AWS Examples
 The `provider` meta-argument in Terraform is used to **explicitly specify which provider configuration** a resource or module should use.
 
----
-
-## 🔹 What is `provider` in Terraform?
-
+What is `provider` in Terraform?
 Terraform allows multiple configurations of the same provider (e.g., AWS in different regions/accounts). The `provider` meta-argument lets you tell Terraform **which named provider to use** for each resource.
 
----
-
-## 🔹 Basic Use Case
+Basic Use Case
 
 ```hcl
 provider "aws" {
@@ -38,16 +32,13 @@ resource "aws_instance" "mumbai" {
 
 ---
 
-## 🔹 Why Use `provider`?
-
+Why Use `provider`?
 * When using **multiple regions**
 * When using **multiple AWS accounts**
 * When separating **resource responsibilities**
 * When writing **reusable modules**
 
----
-
-## 🔹 Syntax
+Syntax
 
 ```hcl
 resource "RESOURCE_TYPE" "NAME" {
@@ -56,9 +47,7 @@ resource "RESOURCE_TYPE" "NAME" {
 }
 ```
 
----
-
-## 🔹 Use with Modules
+Use with Modules
 
 ```hcl
 module "vpc" {
@@ -71,9 +60,7 @@ module "vpc" {
 
 Inside the module, use the default provider reference (`provider "aws" {}`), and the actual alias (`aws.mumbai`) will be injected from the parent config.
 
----
-
-## 🔹 Example: Two AWS Accounts
+Example: Two AWS Accounts
 
 ```hcl
 provider "aws" {
@@ -124,7 +111,7 @@ resource "aws_s3_bucket" "dev_bucket" {
 
 ---
 
-## 🔹 Real World: Multi-Region VPC Creation
+Real World: Multi-Region VPC Creation
 
 ```hcl
 provider "aws" {
@@ -150,7 +137,7 @@ resource "aws_vpc" "apse1_vpc" {
 
 ---
 
-## 🧠 Summary
+Summary
 
 | Attribute  | Description                                   |
 | ---------- | --------------------------------------------- |
@@ -160,5 +147,5 @@ resource "aws_vpc" "apse1_vpc" {
 
 ---
 
-> ✅ Use the `provider` meta-argument when you need **multiple configurations of the same provider** (like AWS) or want to make modules reusable across environments.
+Use the `provider` meta-argument when you need **multiple configurations of the same provider** (like AWS) or want to make modules reusable across environments.
 
