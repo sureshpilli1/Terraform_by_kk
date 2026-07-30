@@ -1,14 +1,8 @@
-# Terraform Variable Rules – Complete Guide with Examples
-
----
-
-##  What Are Input Variables?
-
+Terraform Variable Rules – Complete Guide with Examples
+What Are Input Variables?
 Terraform input variables allow developers to customize configuration without altering code. These variables make infrastructure more reusable, modular, and scalable.
 
----
-
-##  1. Basic Syntax
+1. Basic Syntax
 
 ```hcl
 variable "variable_name" {
@@ -21,7 +15,7 @@ variable "variable_name" {
 
 ---
 
-##  2. Variable Naming Rules
+2. Variable Naming Rules
 
 | Rule                                     | Example                              | Notes                                      |
 | ---------------------------------------- | ------------------------------------ | ------------------------------------------ |
@@ -32,7 +26,7 @@ variable "variable_name" {
 
 ---
 
-##  3. Type Constraints
+3. Type Constraints
 
 Terraform supports several types for input variables.
 
@@ -57,7 +51,7 @@ variable "zones" {
 
 ---
 
-##  4. Default Values
+4. Default Values
 
 * If a default value is provided, the variable becomes optional.
 * If no default, the variable is required.
@@ -71,11 +65,9 @@ variable "region" {
 
 ---
 
-##  5. Validation Rules
-
+5. Validation Rules
 Use `validation` block to restrict acceptable values.
-
-### Example – Instance Type:
+Example – Instance Type:
 
 ```hcl
 variable "instance_type" {
@@ -92,8 +84,7 @@ variable "instance_type" {
 
 ---
 
-##  6. Sensitive Variables
-
+6. Sensitive Variables
 Mark variables `sensitive = true` to prevent them from being shown in logs or outputs.
 
 ```hcl
@@ -105,7 +96,7 @@ variable "db_password" {
 
 ---
 
-##  7. Using Variables in Resources
+7. Using Variables in Resources
 
 ```hcl
 resource "aws_instance" "web" {
@@ -117,7 +108,7 @@ resource "aws_instance" "web" {
 
 ---
 
-##  8. Ways to Assign Variable Values
+8. Ways to Assign Variable Values
 
 | Method               | Description                                     |
 | -------------------- | ----------------------------------------------- |
@@ -128,7 +119,7 @@ resource "aws_instance" "web" {
 
 ---
 
-##  9. Variable Precedence Order (Highest to Lowest)
+9. Variable Precedence Order (Highest to Lowest)
 
 1. Environment variables (`TF_VAR_*`)
 2. CLI flags (`-var`, `-var-file`)
@@ -137,9 +128,9 @@ resource "aws_instance" "web" {
 
 ---
 
-##  10. Real-Time EC2 Example
+10. Real-Time EC2 Example
 
-### `variables.tf`
+`variables.tf`
 
 ```hcl
 variable "ami_id" {
@@ -187,8 +178,7 @@ resource "aws_instance" "example" {
 ```
 
 ---
-
-##  Best Practices
+Best Practices
 
 * Always write clear `description` for each variable
 * Use `validation` to enforce safe values
@@ -198,7 +188,7 @@ resource "aws_instance" "example" {
 
 ---
 
-##  Summary Table
+Summary Table
 
 | Feature      | Use                                   |
 | ------------ | ------------------------------------- |
