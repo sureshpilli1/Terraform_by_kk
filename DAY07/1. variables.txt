@@ -164,3 +164,80 @@ This hides values from Terraform logs and outputs.
 * Assign values using CLI, environment variables, or `.tfvars`.
 * Keep infrastructure DRY (Don't Repeat Yourself) and flexible.
 
+
+
+
+
+ChatGpt explaination:
+--------------------
+aws_instance.ec2_instance.public_ip
+aws_instance.ec2_instance.public_ip
+│            │            │
+│            │            └── Attribute
+│            └────────────── Resource Name
+└─────────────────────────── Resource Type
+
+Where Does public_ip Come From?
+After Terraform creates an EC2 instance, AWS returns lots of information.
+For example:
+EC2 Instance
+
+ID           : i-0abc12345
+Public IP    : 54.210.100.25
+Private IP   : 10.0.1.25
+ARN          : arn:aws:ec2:...
+Availability Zone : us-east-1a
+State        : running
+Terraform stores all of these values in its state file.
+
+So you can access them like this:
+aws_instance.ec2_instance.id
+aws_instance.ec2_instance.public_ip
+aws_instance.ec2_instance.private_ip
+aws_instance.ec2_instance.arn
+aws_instance.ec2_instance.availability_zone
+
+How Do You Know public_ip Exists?
+
+Method 1 (Recommended): Terraform Documentation
+Open the EC2 Instance documentation:
+Terraform AWS Instance Resource Documentation
+Scroll to Attribute Reference.
+You'll find attributes such as:
+id
+arn
+public_ip
+private_ip
+availability_zone
+public_dns
+private_dns
+subnet_id
+vpc_security_group_ids
+...
+That's where you learn that public_ip is available.
+
+Method 2: VS Code Auto-completion
+If you install the HashiCorp Terraform extension in VS Code, it can often suggest resource names and attributes.
+Suppose you type:
+aws_instance.ec2_instance.
+VS Code may show suggestions like:
+id
+public_ip
+private_ip
+public_dns
+private_dns
+arn
+availability_zone
+subnet_id
+So you don't have to remember everything.
+Note: Auto-completion works best after the Terraform provider has been initialized (terraform init) and the extension has enough information about the provider schema.
+
+Method 3: Terraform Console
+After creating resources, you can also inspect values.
+Run:
+terraform console
+Then try expressions like:
+aws_instance.ec2_instance.id
+or
+aws_instance.ec2_instance.public_ip
+Terraform will show the current values (when available in the state).
