@@ -298,3 +298,101 @@ terraform apply
 | Scalable design       | Easily add more subnets or EC2s via inputs |
 
 
+
+chatgpt explaination:
+---------------------
+variable "public_subnets" {
+  description = "Public subnet CIDRs and AZs"
+  type = map(object({
+    cidr = string
+    az   = string
+  }))
+  default = {
+    public1 = { cidr = "10.0.1.0/24", az = "ap-south-1a" }
+    public2 = { cidr = "10.0.2.0/24", az = "ap-south-1b" }
+  }
+}
+
+what is object:
+An object is like a record.
+object is a Terraform data type.
+It means:
+"I want to define a structure that has multiple fields."
+Think of it like a form
+Think of a subnet
+
+Subnet:
+CIDR
+Availability Zone
+
+One object represents one subnet.
+object is not a function. Functions perform some operation and return a value
+object Does Not Calculate Anything. Actually, it returns a type definition, not data.
+
+object({
+  cidr = string
+  az   = string
+})
+
+is the design (blueprint) of an object.
+An actual object is:
+{
+  cidr = "10.0.1.0/24"
+  az   = "ap-south-1a"
+}
+
+A map stores multiple objects.
+
+Map
+public1
+↓
+Object
+CIDR
+10.0.1.0/24
+AZ
+ap-south-1a
+
+------------------------
+
+public2
+↓
+Object
+CIDR
+10.0.2.0/24
+AZ
+ap-south-1b
+
+map(object())
+
+means
+A collection of subnet objects identified by unique names.
+
+The Syntax
+object({
+  cidr = string
+  az   = string
+})
+
+Why Parentheses ()?
+The parentheses belong to the object type.
+"Define an object type using the information inside the parentheses."
+The parentheses tell Terraform:
+"Everything inside describes the structure of this object."
+
+Why Curly Braces {}?
+The curly braces define the fields inside the object.
+
+Why Not Just Write This?
+object(
+  cidr = string
+  az = string
+)
+This would be confusing because object expects one argument: a description of the object's fields.
+Terraform uses a map-like syntax inside {} to clearly define those fields.
+
+
+type = map(object({
+    cidr = string
+    az   = string
+  }))
+A map whose values are objects.
