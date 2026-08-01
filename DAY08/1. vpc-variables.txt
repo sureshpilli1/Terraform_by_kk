@@ -396,3 +396,118 @@ type = map(object({
     az   = string
   }))
 A map whose values are objects.
+
+
+
+how to write a default value for different types of variables 
+
+default = {
+    public1 = { cidr = "10.0.1.0/24", az = "ap-south-1a" }
+    public2 = { cidr = "10.0.2.0/24", az = "ap-south-1b" }
+  }
+
+The type determines the shape of the default value.
+| Type                 | Default Value Example                                           |
+| -------------------- | --------------------------------------------------------------- |
+| `string`             | `"Hello"`                                                       |
+| `number`             | `100`                                                           |
+| `bool`               | `true`                                                          |
+| `list(string)`       | `["A", "B", "C"]`                                               |
+| `set(string)`        | `toset(["A", "B"])`                                             |
+| `map(string)`        | `{ alice = "Dev", bob = "QA" }`                                 |
+| `object({...})`      | `{ cidr = "10.0.1.0/24", az = "ap-south-1a" }`                  |
+| `map(object({...}))` | `{ public1 = { cidr = "...", az = "..." }, public2 = { ... } }` |
+
+
+Types use map(...), list(...), object(...).
+Values never use map() or object(). They are written directly using Terraform's literal syntax ({} for maps/objects, [] for lists).
+This distinction—type (blueprint) vs value (actual data)—is one of the most fundamental concepts in Terraform.
+
+
+explain the following 
+
+validation {
+    condition     = can(regex("^t[23]\\.", var.instance_type))
+    error_message = "Only t2.* or t3.* instance types are allowed."
+  }
+
+
+Validation means:
+Check whether the value entered by the user is valid before Terraform creates any resources.
+
+regex()
+This is a Terraform function.
+Syntax
+regex(pattern, string)
+It means
+Search the string using the given pattern.
+Example
+regex("^t", "t2.micro")
+Result
+Match Found
+
+What is This Pattern?
+^t[23]\\.
+
+This is called a Regular Expression (Regex).
+Let's understand each symbol.
+^---->Means Start of the string
+Example
+t2.micro
+↑
+Start t Means The first character must be t
+
+[23]
+Means Either 2 or 3
+
+So
+t2 Matches and t3
+also matches.
+
+\\.
+This means A literal dot because
+.
+
+in regular expressions . means any character.
+To match an actual period (.), it must be escaped.
+In Terraform strings, the backslash itself must also be escaped, so you write:
+\\.
+This matches:
+.
+
+
+
+can()
+-----
+
+Now comes
+can(...)
+
+This is another Terraform function.
+Purpose
+Checks whether an expression can be evaluated without producing an error.
+
+Without can()
+Suppose
+instance_type = m5.large
+Terraform executes
+regex("^t[23]\\.", "m5.large")
+Since there is no match,
+regex() throws an error.
+
+With can()
+Terraform executes
+can(regex(...))
+Instead of stopping with an error,
+it simply returns
+false
+
+
+What Does error_message Do?
+error_message = "Only t2.* or t3.* instance types are allowed."
+If
+condition == false
+Terraform displays
+Error:
+Only t2.* or t3.* instance types are allowed.
+instead of a confusing regex error.
