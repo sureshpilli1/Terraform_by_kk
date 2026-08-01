@@ -511,3 +511,119 @@ Terraform displays
 Error:
 Only t2.* or t3.* instance types are allowed.
 instead of a confusing regex error.
+
+
+
+
+
+
+what is meant by literal dot and actual period 
+regular expressions (regex), the dot (.) has a special meaning.
+
+What is a Period?
+The symbol  .
+is called a period or dot.
+
+For example:
+t2.micro
+The character between t2 and micro is a period (.).
+
+What Does . Mean in Regex?
+In regular expressions, the dot does not mean an actual period.
+Instead, it is a special symbol (metacharacter).
+It means:
+Match any single character.
+Example
+Regex:
+t.
+The dot means "any one character".
+So it matches:
+ta
+tb
+t1
+t2
+t@
+t#
+because . can represent any single character.
+Example
+Regex:
+a.c
+Matches:
+abc
+a1c
+a-c
+a#c
+a c
+
+because the dot can be:
+b
+1
+-
+#
+space
+Any single character.
+
+But What If I Want to Match an Actual Period?
+Suppose the string is
+t2.micro
+Here the character is a real period.
+If you write
+t2.
+Regex interprets it as:
+t2 + any character
+NOT
+t2 + period
+Escaping the Dot
+To tell regex:
+"I don't mean the special dot. I mean the actual period character."
+you put a backslash before it.
+\.
+This is called escaping the dot.
+Now regex treats it as a normal character.
+Examples
+Suppose the string is
+t2.micro
+Regex:
+t2\.
+means
+t2.
+with a real period.
+It matches:
+t2.micro
+It does not match
+t2Xmicro
+because X is not a period.
+
+Why Double Backslash (\\.) in Terraform?
+This is another layer.
+Terraform strings use the backslash (\) as an escape character.
+If you write
+"\."
+Terraform thinks:
+"\." is an escape sequence.
+To actually pass \. to the regex engine, you must escape the backslash itself.
+So you write:
+"\\."
+Here's what happens:
+Terraform String
+"\\."
+↓
+Terraform interprets it as
+\.
+↓
+Regex engine receives
+\.
+↓
+Regex interprets it as
+Literal period (.)
+Complete Example
+
+Summary
+Pattern	Meaning	Matches
+.	Any single character	a, 1, #, ., etc.
+\.	A literal period (.)	Only .
+\\. (inside a Terraform string)	Produces \. for the regex engine	Matches only a real period (.)
+
+So when you see:
+regex("^t[23]\\.", var.instance_type)
+the \\. is not matching "any character." It specifically requires that the instance type contain a real period, such as in t2.micro or t3.large.
