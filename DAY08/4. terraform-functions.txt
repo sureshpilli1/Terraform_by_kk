@@ -1,0 +1,504 @@
+# Terraform Functions - Complete Classroom Guide
+
+> This document helps you teach Terraform functions to students with hands-on examples, real-time syntax, and demo scenarios.
+
+
+## ✨ What Are Terraform Functions?
+
+* Terraform functions are **built-in helpers** to manipulate values during execution.
+* Used to modify strings, lists, maps, CIDR blocks, timestamps, etc.
+* Functions are evaluated at **plan time**.
+
+**Example Format:**
+
+```hcl
+<function>(arg1, arg2, ...)
+```
+
+---
+
+## 🔄 Function Categories & Common Functions
+
+| Category       | Functions                                                           |
+| -------------- | ------------------------------------------------------------------- |
+| **String**     | `join`, `split`, `upper`, `lower`, `trimspace`, `replace`, `format` |
+| **Numeric**    | `min`, `max`, `ceil`, `floor`                                       |
+| **Collection** | `length`, `merge`, `lookup`, `keys`, `values`, `element`, `compact` |
+| **CIDR/IP**    | `cidrsubnet`, `cidrhost`, `cidrnetmask`                             |
+| **Date/Time**  | `timestamp()`, `formatdate()`                                       |
+| **Conversion** | `tostring`, `tonumber`, `toset`, `try`, `coalesce`, `coalescelist`  |
+| **Encoding**   | `jsonencode`, `jsondecode`, `base64encode`, `base64decode`          |
+| **Misc**       | `uuid()`, `random_uuid()`                                           |
+
+---
+
+## ⚡ Simple Examples (Use in `locals` or `output`)
+
+```hcl
+# String
+output "clean_name" {
+  value = trimspace(lower(" KK Funda "))  # => "kk funda"
+}
+
+# Format + Join
+output "bucket" {
+  value = format("%s-%s-logs", "app", "dev") # => "app-dev-logs"
+}
+
+# Numeric
+output "max_cpu" {
+  value = max(2, 4, 8)                      # => 8
+}
+
+# List/Map
+output "port_count" {
+  value = length([22, 80, 443])            # => 3
+}
+
+output "merged_tags" {
+  value = merge({a = 1}, {b = 2})          # => {a=1, b=2}
+}
+
+# CIDR
+output "subnet" {
+  value = cidrsubnet("10.0.0.0/16", 8, 2)  # => "10.0.2.0/24"
+}
+
+# Coalesce fallback
+output "ami_id" {
+  value = coalesce("", "ami-1234")         # => "ami-1234"
+}
+```
+
+---
+
+## 🚀 Project: EC2 + AMI + AZ Lookup with Functions
+
+### Folder Structure:
+
+```
+.
+├── main.tf
+├── provider.tf
+├── terraform.tf
+├── variables.tf
+├── datasources.tf
+└── outputs.tf
+```
+
+### terraform.tf
+
+```hcl
+terraform {
+  required_version = ">= 1.4"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+```
+
+### provider.tf
+
+```hcl
+provider "aws" {
+  region = var.aws_region
+}
+```
+
+### variables.tf
+
+```hcl
+variable "aws_region" {
+  default = "ap-south-1"
+}
+
+variable "instance_type" {
+  default = "t2.micro"
+}
+
+variable "key_name" {
+  default = "kkfunda-key"
+}
+
+variable "common_tags" {
+  type = map(string)
+  default = {
+    Owner     = "kkfunda"
+    ManagedBy = "Terraform"
+  }
+}
+```
+
+### datasources.tf
+
+```hcl
+data "aws_ami" "al2" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
+  }
+}
+
+data "aws_availability_zones" "available" {}
+```
+
+### main.tf
+
+```hcl
+locals {
+  name_tag   = format("%s-%s", "web", "dev")
+  tags_final = merge(var.common_tags, { Name = local.name_tag })
+}
+
+resource "aws_instance" "web" {
+  ami                         = data.aws_ami.al2.id
+  instance_type               = var.instance_type
+  availability_zone           = data.aws_availability_zones.available.names[0]
+  key_name                    = var.key_name
+  associate_public_ip_address = true
+
+  tags = local.tags_final
+}
+```
+
+### outputs.tf
+
+```hcl
+output "instance_name" {
+  value = local.name_tag
+}
+
+output "ami" {
+  value = data.aws_ami.al2.id
+}
+
+output "zone" {
+  value = data.aws_availability_zones.available.names[0]
+}
+```
+
+---
+
+## ✅ Use These in Terraform Console (Live Demo)
+
+```bash
+terraform console
+> upper("kkfunda")
+> format("%s-%s", "web", "prod")
+> cidrsubnet("10.0.0.0/16", 8, 1)
+> coalesce("", "default-value")
+> merge({a=1}, {b=2})
+```
+
+---
+
+## 🎓 Summary 
+
+* Functions = reusable logic blocks
+* Avoid hardcoding values
+* Use in variables, locals, outputs, data sources
+* Practice using `terraform console`
+
+---
+
+
+
+
+
+
+
+
+chatgpt explanation and functions recommended by it :
+----------------------------------------------------
+1. length() Function
+Purpose
+Returns the number of elements in a string, list, map, or set.
+Syntax
+length(value)
+Example 1: String
+length("Terraform")
+Output:
+9
+Because "Terraform" has 9 characters.
+
+Example 2: List
+length(["web", "app", "db"])
+Output:
+3
+
+Example 3: Map
+length({
+  web = "10.0.1.0/24"
+  app = "10.0.2.0/24"
+})
+Output:
+2
+Real DevOps Use
+count = length(var.public_subnets)
+If you have 3 public subnets, Terraform creates 3 subnet resources.
+
+2. toset()
+Purpose
+Converts a list into a set (removes duplicates).
+Syntax
+toset(list)
+Example
+toset([
+  "alice",
+  "bob",
+  "alice"
+])
+Output
+{
+  "alice",
+  "bob"
+}
+Duplicate "alice" is removed.
+Real DevOps Use
+for_each = toset(var.users)
+
+3. lookup()
+Purpose
+Gets a value from a map using its key.
+Syntax
+lookup(map, key, default)
+The third argument is optional and is returned if the key doesn't exist.
+Example
+variable "departments" {
+  default = {
+    alice = "Dev"
+    bob   = "QA"
+  }
+}
+
+Lookup
+lookup(var.departments, "alice", "Unknown")
+Output
+Dev
+If
+lookup(var.departments, "john", "Unknown")
+Output
+Unknown
+Real DevOps Use
+Find an environment tag.
+lookup(var.tags, "Environment", "dev")
+
+4. keys()
+Purpose
+Returns all the keys from a map.
+Syntax
+keys(map)
+Example
+{
+  alice = "Dev"
+  bob   = "QA"
+  john  = "HR"
+}
+
+Output
+[
+  "alice",
+  "bob",
+  "john"
+]
+Real DevOps Use
+keys(var.public_subnets)
+Output
+[
+  "public1",
+  "public2"
+]
+
+5. values()
+Purpose
+Returns all the values from a map.
+Syntax
+values(map)
+Example
+{
+  alice = "Dev"
+  bob = "QA"
+}
+
+Output
+[
+  "Dev",
+  "QA"
+]
+Real DevOps Use
+Suppose your map stores subnet CIDRs.
+public1 → 10.0.1.0/24
+public2 → 10.0.2.0/24
+Using
+values(var.public_subnets)
+returns all subnet objects.
+
+6. merge()
+Purpose
+Combines two or more maps.
+Syntax
+merge(map1, map2)
+Example
+merge(
+{
+Environment = "Dev"
+},
+{
+Owner = "Suresh"
+}
+)
+Output
+{
+Environment = Dev
+Owner = Suresh
+}
+Real DevOps Use
+Combine default tags and project tags.
+tags = merge(
+var.common_tags,
+{
+Name = "WebServer"
+}
+)
+
+Result
+Environment = Dev
+Project = ABC
+Name = WebServer
+
+7. concat()
+Purpose
+Joins multiple lists.
+Syntax
+concat(list1, list2)
+Example
+concat(
+["web"],
+["app","db"]
+)
+Output
+[
+web
+app
+db
+]
+Real DevOps Use
+Combine subnet lists.
+concat(
+var.public_subnets,
+var.private_subnets
+)
+
+8. contains()
+Purpose
+Checks whether a list or set contains a value.
+Syntax
+contains(list, value)
+Example
+contains(
+["Dev","QA","HR"],
+"QA"
+)
+Output
+true
+
+Example
+contains(
+["Dev","QA"],
+"Finance"
+)
+
+Output
+false
+
+Real DevOps Use
+Validate environments.
+contains(
+["dev","test","prod"],
+var.environment
+)
+
+9. regex()
+Purpose
+Matches text against a pattern.
+Syntax
+regex(pattern, string)
+Example
+regex("^t", "t2.micro")
+Matches
+t2.micro
+
+Example
+regex("^t", "m5.large")
+
+No match
+
+↓
+
+Terraform error
+Real DevOps Use
+Validate EC2 instance types.
+regex("^t[23]\\.", var.instance_type)
+Accepts
+t2.micro
+t3.small
+Rejects
+m5.large
+
+10. can()
+Purpose
+Checks whether an expression can execute successfully.
+Syntax
+can(expression)
+Example
+can(
+tonumber("25")
+)
+
+Output
+true
+Example
+can(
+tonumber("abc")
+)
+Output
+false
+Real DevOps Use
+validation {
+condition = can(regex("^t[23]\\.", var.instance_type))
+}
+Instead of crashing when the regex doesn't match, Terraform simply returns false.
+
+Complete Comparison Table
+| Function     | Purpose                              | Example                    | Output            |
+| ------------ | ------------------------------------ | -------------------------- | ----------------- |
+| `length()`   | Count elements                       | `length(["A","B"])`        | `2`               |
+| `toset()`    | Convert list to set                  | `toset(["A","A","B"])`     | `{A,B}`           |
+| `lookup()`   | Get value from map                   | `lookup(map,"alice","NA")` | `"Dev"`           |
+| `keys()`     | Return map keys                      | `keys(map)`                | `["alice","bob"]` |
+| `values()`   | Return map values                    | `values(map)`              | `["Dev","QA"]`    |
+| `merge()`    | Combine maps                         | `merge(map1,map2)`         | Combined map      |
+| `concat()`   | Join lists                           | `concat(list1,list2)`      | Combined list     |
+| `contains()` | Check if value exists                | `contains(["A","B"],"A")`  | `true`            |
+| `regex()`    | Match text with pattern              | `regex("^t","t2.micro")`   | Match             |
+| `can()`      | Return `true` if expression succeeds | `can(regex(...))`          | `true` or `false` |
+
+
+Since you're learning Terraform from the beginning, I recommend practicing these functions in this order:
+
+length() ⭐⭐⭐⭐⭐ (Very Easy)
+contains() ⭐⭐⭐⭐⭐
+lookup() ⭐⭐⭐⭐
+keys() ⭐⭐⭐⭐
+values() ⭐⭐⭐⭐
+merge() ⭐⭐⭐
+concat() ⭐⭐⭐
+toset() ⭐⭐⭐
+regex() ⭐⭐ (Requires learning regular expressions)
+can() ⭐⭐ (Often used together with regex() and validation)
