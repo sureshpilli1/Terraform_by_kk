@@ -627,3 +627,188 @@ Pattern	Meaning	Matches
 So when you see:
 regex("^t[23]\\.", var.instance_type)
 the \\. is not matching "any character." It specifically requires that the instance type contain a real period, such as in t2.micro or t3.large.
+
+
+
+
+
+
+| Concept                                       | Purpose                                                  | Example                           |
+| --------------------------------------------- | -------------------------------------------------------- | --------------------------------- |
+| `locals`                                      | Store reusable values within the Terraform configuration | `local.tags`                      |
+| `merge()`                                     | Combine two or more maps into one                        | `merge(map1, map2)`               |
+| `var.common_tags`                             | Common tags provided as a variable                       | `Project`, `Owner`                |
+| `local.tags`                                  | Common tags plus the environment tag                     | `Project`, `Owner`, `Env`         |
+| `merge(local.tags, { Name = "kkfunda-igw" })` | Adds a resource-specific `Name` tag to the common tags   | `Project`, `Owner`, `Env`, `Name` |
+
+
+
+What is locals?
+A local is like a temporary variable that exists only inside your Terraform configuration.
+Think of it as giving a name to a value that you'll use multiple times.
+Without locals
+Suppose every AWS resource needs these tags:
+
+tags = {
+  Project = "Terraform"
+  Owner   = "Suresh"
+  Env     = "Dev"
+}
+
+If you have 20 resources, you'll write the same block 20 times.
+
+resource "aws_vpc" "main" {
+  tags = {
+    Project = "Terraform"
+    Owner   = "Suresh"
+    Env     = "Dev"
+  }
+}
+
+resource "aws_subnet" "public" {
+  tags = {
+    Project = "Terraform"
+    Owner   = "Suresh"
+    Env     = "Dev"
+  }
+}
+
+resource "aws_internet_gateway" "igw" {
+  tags = {
+    Project = "Terraform"
+    Owner   = "Suresh"
+    Env     = "Dev"
+  }
+}
+
+Lots of repeated code!
+Using locals
+Instead, define the tags once:
+
+locals {
+  tags = {
+    Project = "Terraform"
+    Owner   = "Suresh"
+    Env     = "Dev"
+  }
+}
+
+Now every resource can simply use:
+tags = local.tags
+Terraform replaces it with:
+Project = Terraform
+Owner   = Suresh
+Env     = Dev
+
+
+What is merge()?
+merge() combines two or more maps into one map.
+
+Syntax
+merge(map1, map2)
+Example 1
+merge(
+  {
+    Name = "Web"
+  },
+  {
+    Env = "Dev"
+  }
+)
+
+Result:
+
+{
+  Name = "Web"
+  Env  = "Dev"
+}
+
+Two maps become one.
+
+
+
+
+Understanding the Second Merge
+Now Terraform reads
+tags = merge(local.tags, { Name = "kkfunda-igw" })
+First
+local.tags
+contains
+{
+  Project = "Terraform"
+  Owner = "Suresh"
+  Env = "Dev"
+}
+Second map
+{
+  Name = "kkfunda-igw"
+}
+Terraform executes
+merge(
+local.tags,
+{
+Name = "kkfunda-igw"
+}
+)
+Result
+{
+  Project = "Terraform"
+  Owner = "Suresh"
+  Env = "Dev"
+  Name = "kkfunda-igw"
+}
+This is finally assigned to the resource.
+Final Tags on the Resource
+Suppose it's an Internet Gateway.
+Terraform sends:
+Project = Terraform
+Owner = Suresh
+Env = Dev
+Name = kkfunda-igw
+
+
+Why Use merge() Again?
+Imagine you have 20 AWS resources.
+All of them should have:
+Project
+Owner
+Environment
+But each resource needs a different Name.
+VPC
+Name = main-vpc
+Public Subnet
+Name = public-subnet
+Internet Gateway
+Name = kkfunda-igw
+Instead of rewriting all the common tags every time, you do:
+tags = merge(local.tags, {
+  Name = "main-vpc"
+})
+or
+tags = merge(local.tags, {
+  Name = "public-subnet"
+})
+or
+tags = merge(local.tags, {
+  Name = "kkfunda-igw"
+})
+This keeps your code short, consistent, and easy to maintain.
+
+
+
+What Happens if Keys Are the Same?
+Example:
+merge(
+{
+  Env = "Dev"
+},
+{
+  Env = "Prod"
+}
+)
+Result
+{
+  Env = "Prod"
+}
+The later map wins.
+This is useful when you want to override a value.
