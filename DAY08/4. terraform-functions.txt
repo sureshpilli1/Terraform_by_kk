@@ -502,3 +502,99 @@ concat() ⭐⭐⭐
 toset() ⭐⭐⭐
 regex() ⭐⭐ (Requires learning regular expressions)
 can() ⭐⭐ (Often used together with regex() and validation)
+
+
+
+
+
+Collection Functions:
+| Function     | Purpose                            |
+| ------------ | ---------------------------------- |
+| `length()`   | Count elements                     |
+| `lookup()`   | Read value from a map              |
+| `keys()`     | Return map keys                    |
+| `values()`   | Return map values                  |
+| `contains()` | Check if a value exists            |
+| `concat()`   | Join lists                         |
+| `merge()`    | Merge maps                         |
+| `flatten()`  | Convert nested lists into one list |
+| `distinct()` | Remove duplicates                  |
+| `sort()`     | Sort values                        |
+| `reverse()`  | Reverse a list                     |
+| `slice()`    | Extract part of a list             |
+| `element()`  | Return element by index            |
+| `index()`    | Find an element's position         |
+| `zipmap()`   | Create a map from two lists        |
+
+
+String Functions:
+| Function       | Purpose                     |
+| -------------- | --------------------------- |
+| `upper()`      | Uppercase                   |
+| `lower()`      | Lowercase                   |
+| `title()`      | Title Case                  |
+| `trim()`       | Remove spaces or characters |
+| `replace()`    | Replace text                |
+| `split()`      | Split a string into a list  |
+| `join()`       | Join a list into a string   |
+| `substr()`     | Extract part of a string    |
+| `startswith()` | Check prefix                |
+| `endswith()`   | Check suffix                |
+
+
+Conversion Functions:
+| Function     | Purpose           |
+| ------------ | ----------------- |
+| `tostring()` | Convert to string |
+| `tonumber()` | Convert to number |
+| `tolist()`   | Convert to list   |
+| `tomap()`    | Convert to map    |
+| `toset()`    | Convert to set    |
+
+Validation Functions:
+| Function     | Purpose                                |
+| ------------ | -------------------------------------- |
+| `can()`      | Check whether an expression succeeds   |
+| `try()`      | Return the first successful expression |
+| `regex()`    | Match a regular expression             |
+| `regexall()` | Return all regex matches               |
+
+Networking Functions:
+| Function        | Purpose                           |
+| --------------- | --------------------------------- |
+| `cidrhost()`    | Get a host IP from a CIDR block   |
+| `cidrsubnet()`  | Create a subnet from a CIDR block |
+| `cidrsubnets()` | Create multiple subnets           |
+| `cidrnetmask()` | Get the subnet mask               |
+
+
+File Functions
+| Function         | Purpose                     |
+| ---------------- | --------------------------- |
+| `file()`         | Read a file                 |
+| `templatefile()` | Read and process a template |
+| `fileexists()`   | Check if a file exists      |
+| `fileset()`      | Return matching files       |
+
+Encoding Functions
+| Function         | Purpose                          |
+| ---------------- | -------------------------------- |
+| `jsonencode()`   | Convert to JSON                  |
+| `jsondecode()`   | Convert JSON to Terraform values |
+| `base64encode()` | Base64 encode                    |
+| `base64decode()` | Base64 decode                    |
+
+
+Hash Functions
+| Function   | Purpose      |
+| ---------- | ------------ |
+| `md5()`    | MD5 hash     |
+| `sha1()`   | SHA-1 hash   |
+| `sha256()` | SHA-256 hash |
+
+Date & Time Functions
+| Function       | Purpose                 |
+| -------------- | ----------------------- |
+| `timestamp()`  | Current UTC time        |
+| `formatdate()` | Format a date           |
+| `timeadd()`    | Add time to a timestamp |
