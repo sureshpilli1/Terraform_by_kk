@@ -812,3 +812,18 @@ Result
 }
 The later map wins.
 This is useful when you want to override a value.
+
+
+
+A Rule That Will Help You Throughout Terraform
+
+There are two ways to know what comes after the dot (.):
+
+Expression	How do you know the field?
+each.value.cidr	From your own object definition (object({ cidr = ..., az = ... }))
+aws_vpc.main.id	From the Terraform provider documentation (Attribute Reference)
+
+This is one of the fundamental ideas in Terraform:
+
+For your own variables and objects, you define the structure, so you already know the available fields.
+For provider resources (AWS, Azure, GCP, etc.), the provider defines the available attributes, and you learn them from the documentation or IDE auto-completion.
