@@ -794,6 +794,28 @@ tags = merge(local.tags, {
 })
 This keeps your code short, consistent, and easy to maintain.
 
+The Most Important Rule:
+------------------------
+
+Whenever you see
+merge(map1, map2)
+both arguments must be maps.
+In your code:
+merge(
+    var.common_tags,
+    { Env = var.environment }
+)
+var.common_tags is already a map.
+var.environment is a string, but it is placed inside a map literal:
+{ Env = var.environment }
+After Terraform evaluates the variable, it becomes:
+{
+  Env = "prod"
+}
+Now merge() is receiving:
+Map + Map
+which is exactly what it expects.
+
 
 
 What Happens if Keys Are the Same?
@@ -827,3 +849,88 @@ This is one of the fundamental ideas in Terraform:
 
 For your own variables and objects, you define the structure, so you already know the available fields.
 For provider resources (AWS, Azure, GCP, etc.), the provider defines the available attributes, and you learn them from the documentation or IDE auto-completion.
+
+
+
+If we're eventually merging environment into common_tags, why not put Env directly inside common_tags?
+The answer is:
+You can do that if the environment never changes.
+However, in real projects, the environment is usually dynamic (Dev, QA, Stage, Prod), while common_tags are static.
+Let's understand this with examples.
+
+Option 1: Put Environment Inside common_tags
+variable "common_tags" {
+  default = {
+    WrittenBy = "kkfunda"
+    Env       = "prod"
+  }
+}
+
+This works perfectly.
+Now your resource can simply use:
+tags = var.common_tags
+Result:
+WrittenBy = kkfunda
+Env = prod
+
+No problem.
+But Suppose Tomorrow...
+Today you are deploying to
+Production
+Tomorrow you want to deploy to
+Development
+Now you must edit your variable.
+variable "common_tags" {
+  default = {
+    WrittenBy = "kkfunda"
+    Env       = "dev"   ← changed manually
+  }
+}
+
+Next week
+QA
+Again
+Env = "qa"
+Every time you deploy to a different environment, you must modify the code.
+❌ This is not a good practice.
+Option 2: Keep Environment Separate
+variable "environment" {
+  default = "prod"
+}
+variable "common_tags" {
+  default = {
+    WrittenBy = "kkfunda"
+  }
+}
+
+Now
+
+locals {
+  tags = merge(
+    var.common_tags,
+    {
+      Env = var.environment
+    }
+  )
+}
+
+Now you don't edit the code.
+Instead, you simply change the variable value.
+Development
+terraform apply -var="environment=dev"
+Terraform creates
+WrittenBy = kkfunda
+Env = dev
+QA
+terraform apply -var="environment=qa"
+Terraform creates
+WrittenBy = kkfunda
+Env = qa
+Production
+terraform apply -var="environment=prod"
+Terraform creates
+WrittenBy = kkfunda
+Env = prod
+Notice
+The code never changed.
+Only the variable value changed.
