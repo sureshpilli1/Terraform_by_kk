@@ -431,6 +431,19 @@ vpc_id
 You choose the attribute that matches what the other resource needs.
 
 
+depends_on = [aws_internet_gateway.igw] why [] for depends on
+Because depends_on is designed to accept one or more resources, Terraform represents its value as a list.
+Why []?
+Square brackets [] represent a list in Terraform.
+You could have multiple dependencies:
+
+depends_on = [
+  aws_internet_gateway.igw,
+  aws_nat_gateway.nat,
+  aws_route_table.public
+]
+
+
 
 
 
