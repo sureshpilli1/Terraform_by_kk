@@ -301,6 +301,38 @@ terraform apply
 
 chatgpt explaination:
 ---------------------
+
+The General Rule You Can Use
+Whenever you're writing a Terraform resource and you see something like:
+some_argument = ???
+ask:
+Step 1
+What type of value does this argument require?
+For NAT Gateway:
+subnet_id
+requires a subnet ID.
+Step 2
+Which Terraform resource creates that thing?
+A subnet is created by:
+resource "aws_subnet" "public"
+Step 3
+Did I use for_each or count?
+You used for_each, so select the instance:
+aws_subnet.public["public1"]
+Step 4
+Which attribute contains the required ID?
+The subnet has:
+.id
+Therefore:
+subnet_id = aws_subnet.public["public1"].id
+This is the general thought process you should use instead of trying to memorize expressions.
+
+
+
+
+
+
+
 variable "public_subnets" {
   description = "Public subnet CIDRs and AZs"
   type = map(object({
