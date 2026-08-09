@@ -328,6 +328,112 @@ subnet_id = aws_subnet.public["public1"].id
 This is the general thought process you should use instead of trying to memorize expressions.
 
 
+2. The subnet resource has attributes
+Think of the subnet as an object containing information:
+aws_subnet.public["public1"]
+
+        |
+        |-- id
+        |-- arn
+        |-- cidr_block
+        |-- availability_zone
+        |-- vpc_id
+        |-- ...
+
+
+Each item is called an attribute.
+For example:
+aws_subnet.public["public1"].id
+gets the ID.
+aws_subnet.public["public1"].cidr_block
+gets the CIDR block.
+aws_subnet.public["public1"].availability_zone
+gets the Availability Zone.
+aws_subnet.public["public1"].vpc_id
+gets the VPC ID.
+
+3. Why do we need .id for NAT Gateway?
+Your NAT Gateway resource says:
+resource "aws_nat_gateway" "nat" {
+  subnet_id = ???
+}
+
+The argument is called:
+subnet_id
+AWS is asking:
+"Give me the ID of the subnet where I should create this NAT Gateway."
+So we need to give it a subnet ID.
+Your subnet resource contains an attribute called:
+id
+Therefore:
+subnet_id = aws_subnet.public["public1"].id
+means:
+Take the id attribute from the public1 subnet and give it to subnet_id.
+Similarly, an AWS subnet has many attributes:
+Subnet
+ID                  → subnet-12345
+CIDR                → 10.0.1.0/24
+Availability Zone   → ap-south-1a
+VPC ID              → vpc-12345
+
+If NAT Gateway asks for:
+Subnet ID
+you select:
+ID → subnet-12345
+In Terraform:
+aws_subnet.public["public1"].id
+
+5. This is why I said "which attribute"
+An attribute is simply a piece of information belonging to a resource.
+For example:
+aws_subnet.public["public1"].id
+                                ↑
+                           attribute
+
+Here:
+
+aws_subnet
+      ↓
+Resource type
+
+public
+      ↓
+Resource name
+
+["public1"]
+      ↓
+Specific instance
+
+.id
+      ↓
+Attribute
+
+6. How do you know which attribute to use?
+This is important:
+You don't need to memorize every attribute.
+You look at the Terraform provider documentation.
+For example, if a resource requires:
+
+subnet_id = ...
+
+you ask:
+"What resource creates a subnet?"
+Answer:
+aws_subnet
+Then you look at the aws_subnet documentation and see its available attributes, including:
+id
+arn
+cidr_block
+availability_zone
+vpc_id
+...
+
+You choose the attribute that matches what the other resource needs.
+
+
+
+
+
 
 
 
